@@ -28,13 +28,14 @@ const MovieList: React.FC = () => {
     dispatch(fetchMovies({ genre: currentGenre, page: currentPage }));
   }, [dispatch, currentGenre, currentPage]);
 
-  const handleSearch = (query: string) => {
-    if (query) {
-      setSearchParams({ search: query });
-    } else {
-      setSearchParams({});
-    }
-  };
+
+  // const handleSearch = (query: string) => {
+  //   if (query) {
+  //     setSearchParams({ search: query });
+  //   } else {
+  //     setSearchParams({});
+  //   }
+  // };
 
   if (isLoading) {
     return (
