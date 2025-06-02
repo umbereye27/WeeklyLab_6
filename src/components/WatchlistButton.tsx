@@ -20,6 +20,7 @@ const WatchlistButton: React.FC<WatchlistButtonProps> = ({ movie }) => {
     if (isInWatchlist) {
       dispatch(removeFromWatchlist(movie.id));
     } else {
+      //@ts-ignore
       dispatch(addToWatchlist(movie));
     }
   };
