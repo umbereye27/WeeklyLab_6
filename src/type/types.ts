@@ -1,5 +1,3 @@
-
-
 export interface Genre {
   id: number;
   name: string;
@@ -28,3 +26,17 @@ export interface WatchlistMovie extends Movie {
   overview: string;
   vote_average: number;
 }
+
+export interface ReviewInput {
+  name: string;
+  rating: number;
+  comment: string;
+}
+
+export interface Review extends ReviewInput {
+  id: string;
+  movieId: string;
+  createdAt: Date;
+}
+
+export type Theme = 'light' | 'dark';

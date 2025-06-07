@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link, Outlet, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { fetchGenres, setGenre } from '../store/slices/moviesSlice';
+import ThemeToggle from '../components/ThemeToggle';
 
 const MainLayout: React.FC = () => {
   const [isGenresOpen, setIsGenresOpen] = useState(false);
@@ -10,7 +11,14 @@ const MainLayout: React.FC = () => {
   const [searchParams] = useSearchParams();
   const genres = useAppSelector(state => state.movies.genres);
   const currentGenre = useAppSelector(state => state.movies.currentGenre);
+  const theme = useAppSelector(state => state.theme.theme);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Apply theme to document
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    document.documentElement.className = theme;
+  }, [theme]);
 
   useEffect(() => {
     dispatch(fetchGenres());
@@ -40,29 +48,47 @@ const MainLayout: React.FC = () => {
     navigate('/?genre=' + encodeURIComponent(genreName));
   };
 
+  const themeClasses = {
+    background: theme === 'light' ? 'bg-gray-50' : 'bg-[#141414]',
+    header: theme === 'light' ? 'bg-white shadow-md' : 'bg-black',
+    text: theme === 'light' ? 'text-gray-900' : 'text-white',
+    textSecondary: theme === 'light' ? 'text-gray-600' : 'text-gray-300',
+    dropdown: theme === 'light' ? 'bg-white border-gray-200' : 'bg-[#1f1f1f] border-gray-700',
+    dropdownItem: theme === 'light' 
+      ? 'text-gray-900 hover:bg-gray-100' 
+      : 'text-white hover:bg-[#2f2f2f]',
+    dropdownItemActive: theme === 'light'
+      ? 'bg-blue-100 text-blue-700'
+      : 'bg-[#2f2f2f] text-[#edb409]',
+  };
+
   return (
-    <div className="min-h-screen bg-[#141414]">
-      {/* Netflix-style header */}
-      <header className="fixed top-0 w-full z-50 bg-black">
+    <div className={`min-h-screen ${themeClasses.background}`}>
+      {/* Header */}
+      <header className={`fixed top-0 w-full z-50 ${themeClasses.header}`}>
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between py-4">
             <div className="flex items-center space-x-8">
-                <Link to="/" className="text-[#edb409] text-3xl font-bold tracking-wider">
+              <Link to="/" className="text-[#edb409] text-3xl font-bold tracking-wider">
                 M
               </Link>
               
               {/* Main navigation */}
               <nav className="hidden md:flex space-x-6">
-                <Link to="/" className="text-white hover:text-gray-300">Home</Link>
-                <Link to="/watchlist" className="text-white hover:text-gray-300">My List</Link>
+                <Link to="/" className={`${themeClasses.text} hover:text-[#edb409] transition-colors`}>
+                  Home
+                </Link>
+                <Link to="/watchlist" className={`${themeClasses.text} hover:text-[#edb409] transition-colors`}>
+                  My List
+                </Link>
               </nav>
             </div>
 
             <div className="flex items-center space-x-6">
-              {/* <SearchBar /> */}
-              <button className="text-white">Movies</button>
+              <ThemeToggle />
+              <button className={themeClasses.text}>Movies</button>
               <div className="relative">
-                <button className="text-white relative">
+                <button className={`${themeClasses.text} relative`}>
                   <span className="absolute -top-2 -right-2 bg-[#edb409] text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
                     1
                   </span>
@@ -82,17 +108,19 @@ const MainLayout: React.FC = () => {
       </header>
 
       {/* Secondary navigation */}
-      <div className="fixed top-16 w-full z-40 bg-black">
+      <div className={`fixed top-16 w-full z-40 ${themeClasses.header}`}>
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <h1 className="text-4xl font-bold text-white">Movies</h1>
+              <h1 className={`text-4xl font-bold ${themeClasses.text}`}>Movies</h1>
               <div className="relative" ref={dropdownRef}>
                 <button 
                   onClick={() => setIsGenresOpen(!isGenresOpen)}
-                  className={`px-4 py-2 bg-[#1f1f1f] text-white rounded-md flex items-center space-x-2 transition-colors duration-200 ${
-                    isGenresOpen ? 'bg-[#2f2f2f]' : 'hover:bg-[#2f2f2f]'
-                  }`}
+                  className={`px-4 py-2 rounded-md flex items-center space-x-2 transition-colors duration-200 ${
+                    theme === 'light'
+                      ? 'bg-gray-100 hover:bg-gray-200 text-gray-900'
+                      : 'bg-[#1f1f1f] hover:bg-[#2f2f2f] text-white'
+                  } ${isGenresOpen ? (theme === 'light' ? 'bg-gray-200' : 'bg-[#2f2f2f]') : ''}`}
                 >
                   <span className="mr-2">{currentGenre || 'Genres'}</span>
                   <svg 
@@ -108,24 +136,26 @@ const MainLayout: React.FC = () => {
 
                 {/* Genres Dropdown */}
                 {isGenresOpen && (
-                  <div className="absolute mt-2 w-56 bg-[#1f1f1f] rounded-md shadow-lg py-1 z-50 max-h-96 overflow-y-auto scrollbar-hide">
+                  <div className={`absolute mt-2 w-56 rounded-md shadow-lg py-1 z-50 max-h-96 overflow-y-auto scrollbar-hide border ${themeClasses.dropdown}`}>
                     <button
                       onClick={() => {
                         dispatch(setGenre(''));
                         setIsGenresOpen(false);
                         navigate('/');
-                      }}                      className={`block w-full text-left px-4 py-2 ${
-                        !currentGenre ? 'bg-[#2f2f2f] text-[#edb409]' : 'text-white hover:bg-[#2f2f2f]'
-                      } transition-colors duration-200`}
+                      }}
+                      className={`block w-full text-left px-4 py-2 transition-colors duration-200 ${
+                        !currentGenre ? themeClasses.dropdownItemActive : themeClasses.dropdownItem
+                      }`}
                     >
                       All Genres
                     </button>
                     {genres.map((genre) => (
                       <button
                         key={genre.id}
-                        onClick={() => handleGenreClick(genre.name)}                        className={`block w-full text-left px-4 py-2 ${
-                          currentGenre === genre.name ? 'bg-[#2f2f2f] text-[#edb409]' : 'text-white hover:bg-[#2f2f2f]'
-                        } transition-colors duration-200`}
+                        onClick={() => handleGenreClick(genre.name)}
+                        className={`block w-full text-left px-4 py-2 transition-colors duration-200 ${
+                          currentGenre === genre.name ? themeClasses.dropdownItemActive : themeClasses.dropdownItem
+                        }`}
                       >
                         {genre.name}
                       </button>
@@ -134,8 +164,6 @@ const MainLayout: React.FC = () => {
                 )}
               </div>
             </div>
-          
-           
           </div>
         </div>
       </div>
